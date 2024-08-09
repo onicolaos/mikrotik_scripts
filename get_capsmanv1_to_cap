@@ -1,0 +1,36 @@
+:do {
+    # Get CAPsMAN addresses and filter out 127.0.0.1
+    :local capsmanAddresses [/interface wireless cap get caps-man-addresses]
+    :local capsmanIP ""
+    :foreach address in=$capsmanAddresses do={
+        :if ($address != "127.0.0.1") do={
+            :if ([:len $capsmanIP] > 0) do={
+                :set capsmanIP ($capsmanIP . ";")
+            }
+            :set capsmanIP ($capsmanIP . $address)
+        }
+    }
+
+    # Define variables
+    :local user "admin"
+    :local configFileName "capsman-config.rsc"
+    
+    # Execute the SSH command to pull the configuration
+    /system ssh address=$capsmanIP user=$user command="/caps-man export terse" output-to-file=$configFileName
+
+    # Wait for the file to be created
+    :delay 2
+
+    # Check if the configuration file exists before importing
+    :if ([/file print count-only where name=$configFileName] > 0) do={
+        # Import the configuration file
+        /import file=$configFileName
+        :log info ("Configuration imported successfully.")
+		/file remove $configFileName
+    } else={
+        :log error ("Configuration file does not exist. Import failed.")
+        :error "Configuration file does not exist. Exiting script."
+    }
+}
+
+# in case wondering why this is useful is because we can set 127.0.0.1 as a secondary capsman address and even if we dont have a connection to capsman address configuration is applied locally

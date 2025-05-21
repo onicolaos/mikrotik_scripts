@@ -41,11 +41,11 @@
         :local rWWW [/ip service get [find name=www] disabled]
         :if ([/ip service get [find name=www] disabled] = true) do={ [/ip service enable [find name=www]] }
         :local AvalibleFrom [/ip service get [find name=www] address]
-        /ip service get [find name=www] address=0.0.0.0/0
+        /ip service set [find name=www] address="0.0.0.0/0"
 
         :log warning ("[SSL] Renewing certificate for $dnsName...")
-        # /certificate enable-ssl-certificate dns-name=$dnsName
-        :delay 15
+        /certificate enable-ssl-certificate dns-name=$dnsName
+        :delay 5
 
         :log warning ("[SSL] Disable firewall input rule related to WEB...")
         /ip firewall filter disable [find where chain=input action=accept comment~"WEB"]

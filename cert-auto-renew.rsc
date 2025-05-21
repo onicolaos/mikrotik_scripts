@@ -37,13 +37,23 @@
         /ip firewall filter enable [find where chain=input action=accept comment~"WEB"]
         :log warning ("[SSL] Disable any dst-nat rule related to WEB...")
         /ip firewall nat disable [find where chain=dstnat action=dst-nat comment~"WEB"]
+        :log warning ("[SSL] Enable WEB service if disabled...")
+        :local rWWW [/ip service get [find name=www] disabled]
+        :if ([/ip service get [find name=www] disabled] = true) do={ [/ip service enable [find name=www]] }
+        :local AvalibleFrom [/ip service get [find name=www] address]
+        /ip service get [find name=www] address=0.0.0.0/0
+
         :log warning ("[SSL] Renewing certificate for $dnsName...")
-        /certificate enable-ssl-certificate dns-name=$dnsName
-        :delay 5
+        # /certificate enable-ssl-certificate dns-name=$dnsName
+        :delay 15
+
         :log warning ("[SSL] Disable firewall input rule related to WEB...")
         /ip firewall filter disable [find where chain=input action=accept comment~"WEB"]
         :log warning ("[SSL] Enable any dst-nat rule related to WEB...")
         /ip firewall nat enable [find where chain=dstnat action=dst-nat comment~"WEB"]
+        :log warning ("[SSL] Disable WEB service if it was disabled...")
+        :if $rWWW do={ [/ip service disable [find name=www]] }
+        /ip service set [find name=www] address=$AvalibleFrom
     } else={
         :log info ("[SSL] Certificate for $dnsName is still valid ($totalDays days left).")
     }

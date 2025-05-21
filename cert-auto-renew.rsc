@@ -47,6 +47,22 @@
         /certificate enable-ssl-certificate dns-name=$dnsName
         :delay 5
 
+        :if ([:len $newCertId] > 0) do={
+
+            :local newCert ($newCertId->0)
+            :local newCertName [/certificate get $newCert name]
+
+            # Trust and assign to services
+            /certificate set $newCert trusted=yes
+            /ip service set www-ssl certificate=$newCertName
+            :log warning "[SSL] New certificate '$newCertName' trusted and applied to WebFig"
+            /user-manager set certificate=$newCertName
+            :log warning "[SSL] New certificate '$newCertName' trusted and applied to User Manager"
+
+        } else={
+            :log error "[SSL] Could not find new untrusted cert to trust/apply"
+        }
+
         :log info ("[SSL] Disable firewall input rule related to WEB...")
         /ip firewall filter disable [find where chain=input action=accept comment~"WEB"]
         :log info ("[SSL] Enable any dst-nat rule related to WEB...")

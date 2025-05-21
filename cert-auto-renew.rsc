@@ -47,6 +47,8 @@
         /certificate enable-ssl-certificate dns-name=$dnsName
         :delay 5
 
+        # Find the newest untrusted cert for same domain
+        :local newCertId [/certificate find where name~$dnsName and trusted=no]
         :if ([:len $newCertId] > 0) do={
 
             :local newCert ($newCertId->0)

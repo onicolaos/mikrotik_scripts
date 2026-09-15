@@ -1,0 +1,23 @@
+# Script name: check-stale-cap
+:local radioFault false
+
+:foreach wifiIf in=[/interface/wifi/find where master=yes and disabled=no] do={
+    :local ifName [/interface/wifi/get $wifiIf name]
+    
+    # Run monitor and extract the full 'about' string containing mode, SSID, and channel
+    :local monitorData [/interface/wifi/monitor $wifiIf once as-value]
+    :local aboutText ($monitorData->"about")
+    
+    # If the word "channel:" is missing from the output text, the driver has crashed
+    :if (!($aboutText ~ "channel:")) do={
+        :log warning "Local Monitor: Word 'channel:' not found on $ifName description text!"
+        :set radioFault true
+    }
+}
+
+# If the channel string vanishes, trigger the physical recovery reboot
+:if ($radioFault = true) do={
+    :log error "Local Monitor: Wi-Fi driver crash confirmed (No channel text). Rebooting cAP AX in 5s..."
+    :delay 5s
+    /system/reboot
+}

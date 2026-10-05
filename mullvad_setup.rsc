@@ -105,8 +105,9 @@ set servers=8.8.8.8,8.8.4.4 cache-size=4096KiB cache-max-ttl=15m \
 
 # Google DNS is included temporarily for testing - remove it after verifying:
 #   /ip dhcp-server network set [find address=192.168.88.0/24] dns-server=<mvDns>
+:local dhcpDns ($mvDns . ",8.8.8.8")
 :if ([:len [/ip dhcp-server network find address=192.168.88.0/24]] > 0) do={
-    /ip dhcp-server network set [find address=192.168.88.0/24] dns-server=8.8.8.8,8.8.4.4,$mvDns
+    /ip dhcp-server network set [find address=192.168.88.0/24] dns-server=$dhcpDns
 }
 
 

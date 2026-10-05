@@ -1,3 +1,4 @@
+:do {
 # =====================================================================
 # Mullvad WireGuard + PPPoE / Static / DHCP failover setup
 # For a MikroTik hAP ac2 (RouterOS 7, legacy /interface wireless)
@@ -168,3 +169,4 @@ set [find default-name=wlan2] disabled=no mode=ap-bridge band=5ghz-n/ac \
     wireless-protocol=802.11 wps-mode=disabled
 
 :put "Mullvad setup applied."
+}
